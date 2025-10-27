@@ -2,17 +2,14 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useState } from "react";
 import { FiLoader, FiEye, FiEyeOff } from "react-icons/fi";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FaUser } from "react-icons/fa6";
 import { MdOutlineEmail } from "react-icons/md";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { registerApi } from "../../api/authApi";
 import type { RegisterValues } from "../types";
-interface RegisterFormProps{
-    onclose?:()=>void
-}
 
-export default function RegisterForm({onclose}:RegisterFormProps) {
+export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -33,7 +30,9 @@ export default function RegisterForm({onclose}:RegisterFormProps) {
       fname: Yup.string().min(2, "First name too short").required("Required"),
       lname: Yup.string().min(2, "Last name too short").required("Required"),
       email: Yup.string().email("Invalid email").required("Required"),
-      password: Yup.string().min(6, "At least 6 characters").required("Required"),
+      password: Yup.string()
+        .min(6, "At least 6 characters")
+        .required("Required"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password")], "Passwords must match")
         .required("Required"),
@@ -253,8 +252,6 @@ export default function RegisterForm({onclose}:RegisterFormProps) {
       </button>
 
       {alert && <p className="text-red-500 text-sm text-center">{alert}</p>}
-
-   
     </form>
   );
 }

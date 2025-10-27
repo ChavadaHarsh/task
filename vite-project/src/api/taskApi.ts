@@ -3,7 +3,6 @@ import type {
   GetTaskResponse,
   GetTasksResponse,
   Task,
-  updatedata,
   UserByRoleResponse,
 } from "../pages/types";
 import { apiClient } from "./apiClient";
@@ -23,19 +22,15 @@ export const createTask = async (
 
 export const getTaskForSeparateUser = async (
   token: string | null | undefined,
-  userId: string | null | undefined,
-
+  userId: string | null | undefined
 ): Promise<GetTasksResponse> => {
   if (!token || !userId) throw new Error("Token and userId are required");
 
-  return apiClient(
-    `/tasks/getTaskForSeparateUser/${userId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  return apiClient(`/tasks/getTaskForSeparateUser/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };
 
 export const statusChangeTask = async (
@@ -47,7 +42,7 @@ export const statusChangeTask = async (
 ): Promise<void> => {
   await apiClient(`/tasks/status/${id}`, {
     method: "PUT",
-    body: { status, statusChangeRole },
+    body: { status, statusChangeRole, adminId },
     headers: {
       Authorization: `Bearer ${token}`,
     },
