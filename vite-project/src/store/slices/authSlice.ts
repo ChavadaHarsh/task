@@ -9,23 +9,23 @@ interface AuthState {
   error: string | null;
 }
 
-const ONE_HOUR = 60 * 60 * 1000; // 1 hour in milliseconds
+const ONE_HOUR = 60 * 60 * 1000; // 1 hour
 
-// Helper: check if session is valid
+// ✅ Helper: check if session is valid
 const isSessionValid = (): boolean => {
-  const token = sessionStorage.getItem("token");
-  const loginTime = sessionStorage.getItem("loginTime");
+  const token = localStorage.getItem("token");
+  const loginTime = localStorage.getItem("loginTime");
   if (!token || !loginTime) return false;
 
   const now = Date.now();
   return now - parseInt(loginTime) <= ONE_HOUR;
 };
 
-// Initialize state from sessionStorage if valid
+// ✅ Initialize from localStorage if valid
 const initialState: AuthState = isSessionValid()
   ? {
-      user: JSON.parse(sessionStorage.getItem("user")!),
-      token: sessionStorage.getItem("token"),
+      user: JSON.parse(localStorage.getItem("user")!),
+      token: localStorage.getItem("token"),
       loading: false,
       error: null,
     }
@@ -36,12 +36,8 @@ const initialState: AuthState = isSessionValid()
       error: null,
     };
 
-// Clear expired session
-if (!isSessionValid()) {
-  sessionStorage.removeItem("token");
-  sessionStorage.removeItem("user");
-  sessionStorage.removeItem("loginTime");
-}
+// ✅ Clear expired or invalid session
+if (!isSessionValid()) localStorage.clear();
 
 const authSlice = createSlice({
   name: "auth",
@@ -51,31 +47,59 @@ const authSlice = createSlice({
       state,
       action: PayloadAction<{ user: LoginResponse["user"]; token: string }>
     ) => {
-      console.log("�� Session Set:", action.payload);
-      // Only set session if no valid session exists
-      if (!isSessionValid()) {
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        sessionStorage.setItem("token", action.payload.token);
-        sessionStorage.setItem("user", JSON.stringify(action.payload.user));
-        sessionStorage.setItem("loginTime", Date.now().toString());
+      const existingUser = localStorage.getItem("user");
+
+      // ✅ If another user already logged in — logout them first
+      if (existingUser) {
+        const storedUser = JSON.parse(existingUser);
+        if (storedUser.email !== action.payload.user.email) {
+          // Notify all tabs to logout
+          localStorage.setItem(
+            "auth-event",
+            JSON.stringify({ type: "force-logout", time: Date.now() })
+          );
+          localStorage.clear();
+          alert("Another user was logged in — previous session cleared.");
+        }
       }
+
+      // ✅ Save new session in localStorage
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      localStorage.setItem("token", action.payload.token);
+      localStorage.setItem("user", JSON.stringify(action.payload.user));
+      localStorage.setItem("loginTime", Date.now().toString());
+
+      // Notify other tabs
+      localStorage.setItem(
+        "auth-event",
+        JSON.stringify({
+          type: "login",
+          user: action.payload.user.email,
+          time: Date.now(),
+        })
+      );
     },
+
     sessionRemove: (state) => {
       state.user = null;
       state.token = null;
-      sessionStorage.removeItem("token");
-      sessionStorage.removeItem("user");
-      sessionStorage.removeItem("loginTime");
+      localStorage.clear();
+      // Notify other tabs
+      localStorage.setItem(
+        "auth-event",
+        JSON.stringify({ type: "logout", time: Date.now() })
+      );
     },
-      updateUser: (state, action: PayloadAction<Partial<user>>) => {
+
+    updateUser: (state, action: PayloadAction<Partial<user>>) => {
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
-        sessionStorage.setItem("user", JSON.stringify(state.user));
+        localStorage.setItem("user", JSON.stringify(state.user));
       }
     },
   },
 });
 
-export const { sessionSet, sessionRemove,updateUser  } = authSlice.actions;
+export const { sessionSet, sessionRemove, updateUser } = authSlice.actions;
 export default authSlice.reducer;
