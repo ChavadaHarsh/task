@@ -10,14 +10,14 @@ const {
   updateProfile,
   getAllUser,
   deleteUser,
-} = require("../Controller/auth");
+} = require("../controller/auth");
 const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 router.post("/register", register);
 router.post("/login", login);
-router.put("/forgotPassword",forgotPassword);
+router.put("/forgotPassword", forgotPassword);
 router.post("/logout", authMiddleware, logout);
 router.get(
   "/getParticularDepartmentUserCount",
@@ -26,8 +26,8 @@ router.get(
 );
 router.get("/getUsersByRole/:department", authMiddleware, getUsersByRole);
 router.get("/getTasksByUserId/:userId", authMiddleware, getTasksByUserId);
-router.post("/updateProfile",authMiddleware,updateProfile)
-router.get("/getAllUser",authMiddleware,getAllUser)
+router.post("/updateProfile", authMiddleware, updateProfile);
+router.get("/getAllUser", authMiddleware, getAllUser);
 router.delete("/deleteUser/:id", authMiddleware, deleteUser);
 
 module.exports = router;
