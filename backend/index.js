@@ -10,12 +10,7 @@ const PORT = 3000;
 // Connect to MongoDB
 connectDB();
 // Middleware
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.urlencoded({ extended: true })); // for handling form data
 app.use(express.json());
 
