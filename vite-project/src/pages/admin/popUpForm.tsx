@@ -32,7 +32,7 @@ export default function PopUpForm({ user, onClose, onSubmit }: PopUpFormProps) {
       setLoading(true);
       try {
         onSubmit(values);
-        onClose();
+       
       } catch (err) {
         console.error(err);
       } finally {
