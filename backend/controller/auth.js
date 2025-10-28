@@ -92,6 +92,7 @@ exports.login = async (req, res) => {
         lname: user.lname,
         email: user.email,
         role: user.role,
+        password: user.password,
         department: user.department,
       },
       token,
@@ -280,6 +281,7 @@ exports.getUsersByRole = async (req, res) => {
           role: user.role,
           state: user.state,
           department: user.department,
+          password: user.department,
           tasks,
           completedTasks,
           totalTasks,
@@ -315,7 +317,9 @@ exports.updateProfile = async (req, res) => {
   try {
     const data = req.body;
 
-    const { error } = updateProfileValidation.validate(data, { abortEarly: false });
+    const { error } = updateProfileValidation.validate(data, {
+      abortEarly: false,
+    });
     if (error) {
       return res.status(400).json({
         success: false,
@@ -360,7 +364,6 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-
 exports.getAllUser = async (req, res) => {
   try {
     if (!req.user || req.user.role !== "admin") {
@@ -370,8 +373,10 @@ exports.getAllUser = async (req, res) => {
       });
     }
 
-const users = await User.find({ role: { $ne: "admin" } }).select("-password");
- 
+    const users = await User.find({ role: { $ne: "admin" } }).select(
+      "-password"
+    );
+
     return res.status(200).json({
       success: true,
       data: users,
@@ -415,4 +420,3 @@ exports.deleteUser = async (req, res) => {
     });
   }
 };
-
