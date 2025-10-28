@@ -1,4 +1,4 @@
-import { FaUsers } from "react-icons/fa6";
+import { FaUsers, FaSpinner } from "react-icons/fa6";
 import PageLayout from "../components/pageLoyout";
 import { IoPersonAdd } from "react-icons/io5";
 import { useEffect, useRef, useState } from "react";
@@ -17,6 +17,7 @@ import { updateProfile } from "../../api/authApi";
 export default function Employees() {
   const [pop, setPop] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false); // ✅ Add loading state
   const [editProfile, setEditProfile] = useState(false);
   const [selectedUser, setSelectedUser] = useState<user | null>(null);
 
@@ -24,6 +25,18 @@ export default function Employees() {
   const navigate = useNavigate();
   const hasFetched = useRef(false);
 
+  const fetchUsers = async () => {
+    try {
+      setLoading(true); // ✅ Start loading
+      const res = await getAllUser(auth.token);
+      const filteredUsers = res.data.filter((u: User) => u.role !== "admin");
+      setUsers(filteredUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false); // ✅ Stop loading after completion
+    }
+  };
   // Fetch all users
   useEffect(() => {
     if (!auth?.token) {
@@ -33,18 +46,6 @@ export default function Employees() {
 
     if (hasFetched.current) return;
     hasFetched.current = true;
-
-    const fetchUsers = async () => {
-      try {
-        const res = await getAllUser(auth.token);
-
-        // Optional: filter out admins if needed
-        const filteredUsers = res.data.filter((u: User) => u.role !== "admin");
-        setUsers(filteredUsers);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
 
     fetchUsers();
   }, [auth?.token, navigate]);
@@ -67,44 +68,36 @@ export default function Employees() {
       setUsers((prev) =>
         prev.map((u) => (u._id === updatedUser._id ? updatedUser : u))
       );
-
     } catch (error) {
       console.error("Failed to update profile:", error);
     }
   };
+
+  // Handle user delete
   const handleUserDelete = async (id: string) => {
     try {
       await deleteUser(auth.token, id);
-
       setUsers((prev) => prev.filter((user) => user._id !== id));
     } catch (error) {
       console.error("Failed to delete user:", error);
     }
   };
 
-
-
-
-
-
-
   // Open edit modal
   const onEdit = (id: string) => {
-    const userFound = users.find(u => u._id === id);
+    const userFound = users.find((u) => u._id === id);
 
     const selectedUser: user | null = userFound
       ? {
-        ...userFound,
-        id: userFound._id,
-        role: userFound.role as "admin" | "employee", // cast role
-      }
+          ...userFound,
+          id: userFound._id,
+          role: userFound.role as "admin" | "employee",
+        }
       : null;
 
     setSelectedUser(selectedUser);
     setEditProfile(true);
   };
-
-
 
   return (
     <PageLayout>
@@ -127,6 +120,69 @@ export default function Employees() {
           </button>
         </div>
 
+        {/* ✅ Show loading spinner while fetching */}
+        {loading ? (
+          <div className="w-full flex justify-center items-center py-10">
+            <FaSpinner className="animate-spin text-4xl text-blue-600" />
+          </div>
+        ) : (
+          <>
+            {/* Users Table */}
+            <div className="overflow-x-auto w-full">
+              <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
+                <thead>
+                  <tr className="bg-gray-100 text-gray-700 uppercase text-sm text-center">
+                    <th className="px-4 py-3 border-b">ID</th>
+                    <th className="px-4 py-3 border-b">Name</th>
+                    <th className="px-4 py-3 border-b">Team</th>
+                    <th className="px-4 py-3 border-b text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr
+                      key={user._id}
+                      className="border-b border-b-gray-300 hover:bg-gray-50 transition-colors text-center"
+                    >
+                      <td className="px-1 py-3 font-semibold text-gray-700">
+                        {user._id}
+                      </td>
+                      <td className="px-4 py-3 capitalize">
+                        {user.fname} {user.lname}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="bg-gray-200 text-gray-800 text-sm font-semibold px-3 py-1 rounded-full">
+                          {user.department}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 flex justify-center gap-3">
+                        <button
+                          onClick={() => onEdit(user._id)}
+                          className="p-2 rounded-lg border border-blue-400 text-blue-500 hover:bg-blue-100"
+                        >
+                          <AiOutlineEdit size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleUserDelete(user._id)}
+                          className="p-2 rounded-lg border border-red-400 text-red-500 hover:bg-red-100"
+                        >
+                          <AiOutlineDelete size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {users.length === 0 && (
+                <p className="text-center text-gray-500 py-6">
+                  No employees found.
+                </p>
+              )}
+            </div>
+          </>
+        )}
+
         {/* Add Employee Modal */}
         {pop && (
           <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
@@ -141,54 +197,15 @@ export default function Employees() {
               <h1 className="text-3xl font-bold text-center mb-5 text-[#2b2d42]">
                 Add Employee
               </h1>
-
-              <RegisterForm />
+              <RegisterForm
+                onSuccess={() => {
+                  setPop(false);
+                  fetchUsers();
+                }}
+              />
             </div>
           </div>
         )}
-      </div>
-
-      {/* Users Table */}
-      <div className="overflow-x-auto w-full">
-        <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
-          <thead>
-            <tr className="bg-gray-100 text-gray-700 uppercase text-sm text-center">
-              <th className="px-4 py-3 border-b">ID</th>
-              <th className="px-4 py-3 border-b">Name</th>
-              <th className="px-4 py-3 border-b">Team</th>
-              <th className="px-4 py-3 border-b text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(user => (
-              <tr
-                key={user._id}
-                className="border-b border-b-gray-300 hover:bg-gray-50 transition-colors text-center"
-              >
-                <td className="px-1 py-3 font-semibold text-gray-700">{user._id}</td>
-                <td className="px-4 py-3 capitalize">{user.fname} {user.lname}</td>
-                <td className="px-4 py-3">
-                  <span className="bg-gray-200 text-gray-800 text-sm font-semibold px-3 py-1 rounded-full">
-                    {user.department}
-                  </span>
-                </td>
-                <td className="px-4 py-3 flex justify-center gap-3">
-                  <button
-                    onClick={() => onEdit(user._id)}
-                    className="p-2 rounded-lg border border-blue-400 text-blue-500 hover:bg-blue-100"
-                  >
-                    <AiOutlineEdit size={18} />
-                  </button>
-                  <button onClick={() => {
-                    handleUserDelete(user._id)
-                  }} className="p-2 rounded-lg border border-red-400 text-red-500 hover:bg-red-100">
-                    <AiOutlineDelete size={18} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
 
       {/* Edit Profile Modal */}

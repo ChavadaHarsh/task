@@ -14,7 +14,7 @@ import {
 } from "react-icons/fa6";
 import { MdColorLens } from "react-icons/md";
 import QuickRes from "./quick";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { FaSpinner } from "react-icons/fa";
 export default function Dashboard() {
   const auth = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
@@ -59,14 +59,12 @@ export default function Dashboard() {
             Work Tracking Dashboard
           </h1>
         </div>
-
         {loading && (
           <p className="flex items-center gap-2 text-gray-600">
-            <AiOutlineLoading3Quarters className="animate-spin text-xl" />
-            Loading...
+            <FaSpinner className="animate-spin text-4xl text-blue-600" />
           </p>
-        )}        {error && <p className="text-red-500">{error}</p>}
-
+        )}{" "}
+        {error && <p className="text-red-500">{error}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6  cursor-pointer ">
           {userCounts.map((dept) => (
             <div
@@ -102,14 +100,15 @@ export default function Dashboard() {
                 completed tasks
               </p>
               <p
-                className={`text-md flex gap-1 py-1 px-1.5 rounded-xl font-[500] items-center ${dept.completedPercent === 0
+                className={`text-md flex gap-1 py-1 px-1.5 rounded-xl font-[500] items-center ${
+                  dept.completedPercent === 0
                     ? "bg-red-500 text-white"
                     : dept.completedPercent < 25
-                      ? "bg-blue-500"
-                      : dept.completedPercent < 50
-                        ? "bg-yellow-500"
-                        : "bg-green-600"
-                  }`}
+                    ? "bg-blue-500"
+                    : dept.completedPercent < 50
+                    ? "bg-yellow-500"
+                    : "bg-green-600"
+                }`}
               >
                 <span className="font-bold">{dept.completedPercent}%</span>{" "}
                 complete
@@ -117,13 +116,14 @@ export default function Dashboard() {
 
               <button
                 className={`px-1.5 text-md mt-4 text-white font-semibold  hover:bg-[#333] rounded-md py-1 cursor-pointer
-                  ${dept.departmentName === "Web Development"
-                    ? "bg-blue-600"
-                    : dept.departmentName === "Android Development"
+                  ${
+                    dept.departmentName === "Web Development"
+                      ? "bg-blue-600"
+                      : dept.departmentName === "Android Development"
                       ? "bg-green-600"
                       : dept.departmentName === "iOS Development"
-                        ? "bg-black"
-                        : "bg-blue-500"
+                      ? "bg-black"
+                      : "bg-blue-500"
                   }`}
                 onClick={() =>
                   navigate(`/dashboard/usersview?dept=${dept.departmentName}`)

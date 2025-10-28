@@ -12,7 +12,11 @@ interface UserTaskCardProps {
   setEditingId: (id: string | null) => void;
   setEditValue: (val: string) => void;
   handleTitleEdit: (taskId: string | null, userId: string, task: Task) => void;
-  handleStatusToggle: (taskId: string | null, userId: string, currentStatus: "completed" | "pending") => void;
+  handleStatusToggle: (
+    taskId: string | null,
+    userId: string,
+    currentStatus: "completed" | "pending"
+  ) => void;
   handleDelete: (taskId: string | null, userId: string) => void;
   handleDragStart: (index: number) => void;
   handleDrop: (index: number, userId: string) => void;
@@ -34,7 +38,10 @@ export default function UserTaskCard({
   const auth = useSelector((state: RootState) => state.auth);
 
   return (
-    <div key={user._id} className="bg-white rounded-lg shadow-md p-5 w-full mx-auto mt-4">
+    <div
+      key={user._id}
+      className="bg-white rounded-lg shadow-md p-5 w-full mx-auto mt-4"
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -50,17 +57,19 @@ export default function UserTaskCard({
               {user.department}
             </span>
             <span className="bg-yellow-400 text-white px-2 py-0.5 rounded text-xs font-semibold">
-              {user.completionPercentage}% Complete ({user.completedTasks}/{user.totalTasks})
+              {user.completionPercentage}% Complete ({user.completedTasks}/
+              {user.totalTasks})
             </span>
           </div>
         </div>
-        {auth.user?.role === "admin" && (<button
-          onClick={() => setSelectedUser?.(user)}
-          className="bg-purple-600 text-white px-4 py-2 cursor-pointer rounded font-medium shadow hover:bg-purple-700 transition"
-        >
-          + Add Task
-        </button>)}
-
+        {auth.user?.role === "admin" && (
+          <button
+            onClick={() => setSelectedUser?.(user)}
+            className="bg-purple-600 text-white px-4 py-2 cursor-pointer rounded font-medium shadow hover:bg-purple-700 transition"
+          >
+            + Add Task
+          </button>
+        )}
       </div>
 
       {/* Task List */}
@@ -68,8 +77,9 @@ export default function UserTaskCard({
         user.tasks.map((task, index) => (
           <div
             key={task._id}
-            className={`flex items-center rounded px-4 py-2 mb-2 ${task.status === "completed" ? "bg-green-100" : "bg-gray-100"
-              }`}
+            className={`flex items-center rounded px-4 py-2 mb-2 ${
+              task.status === "completed" ? "bg-green-100" : "bg-gray-100"
+            }`}
             draggable
             onDragStart={() => handleDragStart(index)}
             onDragOver={(e) => e.preventDefault()}
@@ -79,9 +89,14 @@ export default function UserTaskCard({
             <input
               type="checkbox"
               checked={task.status === "completed"}
-              onChange={() => handleStatusToggle(task._id ?? "", user._id, task.status)}
-              className={`mr-3 w-4 h-4 ${task.status === "completed" ? "accent-green-500" : "accent-gray-500"
-                }`}
+              onChange={() =>
+                handleStatusToggle(task._id ?? "", user._id, task.status)
+              }
+              className={`mr-3 w-4 h-4 ${
+                task.status === "completed"
+                  ? "accent-green-500"
+                  : "accent-gray-500"
+              }`}
             />
 
             {/* Edit Mode */}
@@ -108,16 +123,20 @@ export default function UserTaskCard({
                   setEditValue(task.title);
                 }}
                 title="Edit Title"
-                className={`flex-1 cursor-text ${task.status === "completed"
-                  ? "line-through text-gray-500"
-                  : "text-gray-700"
-                  }`}
+                className={`flex-1 cursor-text ${
+                  task.status === "completed"
+                    ? "line-through text-gray-500"
+                    : "text-gray-700"
+                }`}
               >
                 {task.title || "Unnamed Task"}
               </span>
             )}
 
-            <button className="ml-2" onClick={() => handleDelete(task._id ?? "", user._id)}>
+            <button
+              className="ml-2"
+              onClick={() => handleDelete(task._id ?? "", user._id)}
+            >
               <FaTrash className="w-5 h-5 text-red-500 cursor-pointer hover:text-red-700 transition" />
             </button>
           </div>

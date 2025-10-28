@@ -20,16 +20,16 @@ export default function Register() {
         <h1 className="text-3xl font-bold text-center mb-3 text-[#2b2d42]">
           Create Account
         </h1>
-        <RegisterForm />
-           <div className="text-center mt-2 text-gray-700">
-        Already have an account?{" "}
-        <Link
-          to="/login"
-          className="text-blue-600 hover:text-blue-800 font-semibold hover:underline"
-        >
-          Login
-        </Link>
-      </div>
+        <RegisterForm onSuccess={() => navigate("/login")} />
+        <div className="text-center mt-2 text-gray-700">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-blue-600 hover:text-blue-800 font-semibold hover:underline"
+          >
+            Login
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -2,19 +2,21 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useState } from "react";
 import { FiLoader, FiEye, FiEyeOff } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
 import { FaUser } from "react-icons/fa6";
 import { MdOutlineEmail } from "react-icons/md";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { registerApi } from "../../api/authApi";
 import type { RegisterValues } from "../types";
 
-export default function RegisterForm() {
+interface RegisterFormProps {
+  onSuccess?: () => void;
+}
+
+export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [alert, setAlert] = useState<string>();
-  const navigate = useNavigate();
 
   const formik = useFormik<RegisterValues>({
     initialValues: {
@@ -42,8 +44,8 @@ export default function RegisterForm() {
         setLoading(true);
         const { confirmPassword, ...payload } = values;
         await registerApi(payload);
+        if (onSuccess) onSuccess();
         resetForm();
-        navigate("/login");
       } catch (error: any) {
         setAlert(error.message || "Registration failed");
       } finally {

@@ -5,7 +5,12 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import type { Task, UserWithTaskCount } from "../types";
 import PopUpForm from "./popUpForm";
-import { createTask, deleteTask, statusChangeTask, updateTask } from "../../api/taskApi";
+import {
+  createTask,
+  deleteTask,
+  statusChangeTask,
+  updateTask,
+} from "../../api/taskApi";
 import {
   FaAndroid,
   FaApple,
@@ -26,7 +31,9 @@ export default function UsersView() {
   const [users, setUsers] = useState<UserWithTaskCount[]>([]);
   const [loading, setLoading] = useState(false);
   const auth = useSelector((state: RootState) => state.auth);
-  const [selectedUser, setSelectedUser] = useState<UserWithTaskCount | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserWithTaskCount | null>(
+    null
+  );
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -70,10 +77,10 @@ export default function UsersView() {
           prevUsers.map((user) =>
             user._id === selectedUser._id
               ? {
-                ...user,
-                tasks: [...(user.tasks || []), res.task],
-                totalTasks: (user.totalTasks || 0) + 1,
-              }
+                  ...user,
+                  tasks: [...(user.tasks || []), res.task],
+                  totalTasks: (user.totalTasks || 0) + 1,
+                }
               : user
           )
         );
@@ -85,8 +92,10 @@ export default function UsersView() {
     }
   };
 
-
-  const handleDelete = async (id: string | null | undefined, userId?: string) => {
+  const handleDelete = async (
+    id: string | null | undefined,
+    userId?: string
+  ) => {
     if (!id || !userId) return;
     if (!auth?.token) return;
 
@@ -96,13 +105,17 @@ export default function UsersView() {
         prevUsers.map((user) =>
           user._id === userId
             ? {
-              ...user,
-              tasks: user.tasks.filter((task) => task._id !== id),
-              totalTasks: user.totalTasks - 1,
-              completedTasks:
-                user.completedTasks -
-                (user.tasks.find((task) => task._id === id && task.status === "completed") ? 1 : 0),
-            }
+                ...user,
+                tasks: user.tasks.filter((task) => task._id !== id),
+                totalTasks: user.totalTasks - 1,
+                completedTasks:
+                  user.completedTasks -
+                  (user.tasks.find(
+                    (task) => task._id === id && task.status === "completed"
+                  )
+                    ? 1
+                    : 0),
+              }
             : user
         )
       );
@@ -150,7 +163,9 @@ export default function UsersView() {
             (t) => t.status === "completed"
           ).length;
           const completionPercentage =
-            totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            totalTasks > 0
+              ? Math.round((completedTasks / totalTasks) * 100)
+              : 0;
 
           return {
             ...user,
@@ -164,9 +179,7 @@ export default function UsersView() {
     } catch (err) {
       console.error("Error updating status:", err);
     }
-
   };
-
 
   const handleTitleEdit = async (
     taskId: string | null | undefined,
@@ -187,11 +200,11 @@ export default function UsersView() {
         prevUsers.map((user) =>
           user._id === userId
             ? {
-              ...user,
-              tasks: user.tasks.map((t) =>
-                t._id === taskId ? { ...t, title: editValue } : t
-              ),
-            }
+                ...user,
+                tasks: user.tasks.map((t) =>
+                  t._id === taskId ? { ...t, title: editValue } : t
+                ),
+              }
             : user
         )
       );
@@ -202,7 +215,6 @@ export default function UsersView() {
       console.error("Error updating title:", err);
     }
   };
-
 
   const handleDragStart = (index: number) => setDraggedIndex(index);
 
@@ -221,22 +233,27 @@ export default function UsersView() {
   };
 
   const deptIcons: Record<string, JSX.Element> = {
-    "Web Development": <FaGlobe className="text-3xl md:text-4xl xl:text-5xl text-blue-600" />,
-    "Android Development": <FaAndroid className="text-3xl md:text-4xl xl:text-5xl text-green-600" />,
-    "iOS Development": <FaApple className="text-3xl md:text-4xl xl:text-5xl text-black" />,
-    Designing: <FaPalette className="text-3xl md:text-4xl xl:text-5xl text-blue-500" />,
-    Employees: <FaUsers className="text-3xl md:text-4xl xl:text-5xl text-[#2b2d42]" />,
+    "Web Development": (
+      <FaGlobe className="text-3xl md:text-4xl xl:text-5xl text-blue-600" />
+    ),
+    "Android Development": (
+      <FaAndroid className="text-3xl md:text-4xl xl:text-5xl text-green-600" />
+    ),
+    "iOS Development": (
+      <FaApple className="text-3xl md:text-4xl xl:text-5xl text-black" />
+    ),
+    Designing: (
+      <FaPalette className="text-3xl md:text-4xl xl:text-5xl text-blue-500" />
+    ),
+    Employees: (
+      <FaUsers className="text-3xl md:text-4xl xl:text-5xl text-[#2b2d42]" />
+    ),
   };
 
   return (
     <PageLayout>
-      {loading && (
-        <div className="w-full flex justify-center items-center py-10">
-          <FaSpinner className="animate-spin text-4xl text-blue-600" />
-        </div>
-      )}
       <div className="w-full mt-5 xl:mt-2">
-        <div className=" flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
           <div className="flex gap-4 items-center">
             {deptIcons[dept || ""]}
             <h1 className="text-2xl md:text-3xl xl:text-4xl font-[500] text-[#2b2d42]">
@@ -252,24 +269,43 @@ export default function UsersView() {
           </Link>
         </div>
 
-        {users.map((user) => (
-          <UserTaskCard
-            key={user._id}
-            user={user}
-            setSelectedUser={setSelectedUser}
-            editingId={editingId}
-            editValue={editValue}
-            setEditingId={setEditingId}
-            setEditValue={setEditValue}
-            handleTitleEdit={handleTitleEdit}
-            handleStatusToggle={handleStatusToggle}
-            handleDelete={handleDelete}
-            handleDragStart={handleDragStart}
-            handleDrop={handleDrop}
-          />
-        ))}
+        {/* 👇 Conditional rendering for loading/error/data */}
+        {loading ? (
+          <div className="w-full flex justify-center items-center py-10">
+            <FaSpinner className="animate-spin text-4xl text-blue-600" />
+          </div>
+        ) : users.length === 0 ? (
+          <div className="text-center text-gray-500 py-10 font-medium">
+            No users found for this department.
+          </div>
+        ) : (
+          <>
+            {users.map((user) => (
+              <UserTaskCard
+                key={user._id}
+                user={user}
+                setSelectedUser={setSelectedUser}
+                editingId={editingId}
+                editValue={editValue}
+                setEditingId={setEditingId}
+                setEditValue={setEditValue}
+                handleTitleEdit={handleTitleEdit}
+                handleStatusToggle={handleStatusToggle}
+                handleDelete={handleDelete}
+                handleDragStart={handleDragStart}
+                handleDrop={handleDrop}
+              />
+            ))}
 
-        {selectedUser && <PopUpForm user={selectedUser} onClose={() => setSelectedUser(null)} onSubmit={handleSubmit} />}
+            {selectedUser && (
+              <PopUpForm
+                user={selectedUser}
+                onClose={() => setSelectedUser(null)}
+                onSubmit={handleSubmit}
+              />
+            )}
+          </>
+        )}
       </div>
     </PageLayout>
   );
