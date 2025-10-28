@@ -37,6 +37,7 @@ export default function UsersView() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
   const navigate = useNavigate();
 
   const fetchUsers = async () => {
@@ -64,6 +65,7 @@ export default function UsersView() {
     if (!auth?.token || !auth?.user || !selectedUser?._id) return;
 
     try {
+      setLoading(true);
       const task = {
         ...data,
         adminId: auth.user.id,
@@ -89,6 +91,8 @@ export default function UsersView() {
       setSelectedUser(null);
     } catch (error) {
       console.error("Error creating task:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -99,26 +103,26 @@ export default function UsersView() {
     if (!id || !userId) return;
     if (!auth?.token) return;
 
+    setUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        user._id === userId
+          ? {
+              ...user,
+              tasks: user.tasks.filter((task) => task._id !== id),
+              totalTasks: user.totalTasks - 1,
+              completedTasks:
+                user.completedTasks -
+                (user.tasks.find(
+                  (task) => task._id === id && task.status === "completed"
+                )
+                  ? 1
+                  : 0),
+            }
+          : user
+      )
+    );
     try {
       await deleteTask(auth.token, id);
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user._id === userId
-            ? {
-                ...user,
-                tasks: user.tasks.filter((task) => task._id !== id),
-                totalTasks: user.totalTasks - 1,
-                completedTasks:
-                  user.completedTasks -
-                  (user.tasks.find(
-                    (task) => task._id === id && task.status === "completed"
-                  )
-                    ? 1
-                    : 0),
-              }
-            : user
-        )
-      );
     } catch (error) {
       console.error("Error deleting task:", error);
     }
@@ -136,6 +140,33 @@ export default function UsersView() {
 
     const statusChangeRole: "none" | "admin" | "employee" =
       auth.user?.role === "admin" ? "admin" : "employee"; // determine role dynamically
+    // ✅ Update local state immediately with recalculated stats
+    setUsers((prevUsers) =>
+      prevUsers.map((user) => {
+        if (user._id !== userId) return user;
+
+        // Update tasks
+        const updatedTasks = user.tasks.map((t) =>
+          t._id === taskId ? { ...t, status: newStatus } : t
+        );
+
+        // Recalculate task stats
+        const totalTasks = updatedTasks.length;
+        const completedTasks = updatedTasks.filter(
+          (t) => t.status === "completed"
+        ).length;
+        const completionPercentage =
+          totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+        return {
+          ...user,
+          tasks: updatedTasks,
+          totalTasks,
+          completedTasks,
+          completionPercentage,
+        };
+      })
+    );
 
     try {
       // ✅ Call API to update task status
@@ -145,36 +176,6 @@ export default function UsersView() {
         newStatus,
         statusChangeRole,
         auth.user?.id
-      );
-
-      // ✅ Update local state immediately with recalculated stats
-      setUsers((prevUsers) =>
-        prevUsers.map((user) => {
-          if (user._id !== userId) return user;
-
-          // Update tasks
-          const updatedTasks = user.tasks.map((t) =>
-            t._id === taskId ? { ...t, status: newStatus } : t
-          );
-
-          // Recalculate task stats
-          const totalTasks = updatedTasks.length;
-          const completedTasks = updatedTasks.filter(
-            (t) => t.status === "completed"
-          ).length;
-          const completionPercentage =
-            totalTasks > 0
-              ? Math.round((completedTasks / totalTasks) * 100)
-              : 0;
-
-          return {
-            ...user,
-            tasks: updatedTasks,
-            totalTasks,
-            completedTasks,
-            completionPercentage,
-          };
-        })
       );
     } catch (err) {
       console.error("Error updating status:", err);
@@ -186,28 +187,27 @@ export default function UsersView() {
     userId: string,
     task: Task
   ) => {
+    if (!taskId || !auth?.token) return;
+
+    setUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        user._id === userId
+          ? {
+              ...user,
+              tasks: user.tasks.map((t) =>
+                t._id === taskId ? { ...t, title: editValue } : t
+              ),
+            }
+          : user
+      )
+    );
+    // Create updated task object
+    const updatedTask = { ...task, title: editValue };
     try {
-      if (!taskId || !auth?.token) return;
-
-      // Create updated task object
-      const updatedTask = { ...task, title: editValue };
-
       // Update on backend
       await updateTask(auth.token, taskId, updatedTask);
 
       // Update on frontend
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user._id === userId
-            ? {
-                ...user,
-                tasks: user.tasks.map((t) =>
-                  t._id === taskId ? { ...t, title: editValue } : t
-                ),
-              }
-            : user
-        )
-      );
 
       setEditingId(null);
       setEditValue("");

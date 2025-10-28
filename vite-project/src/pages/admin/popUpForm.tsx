@@ -12,8 +12,6 @@ export default function PopUpForm({ user, onClose, onSubmit }: PopUpFormProps) {
     titleInputRef.current?.focus();
   }, []);
 
-
-
   const validationSchema = Yup.object({
     title: Yup.string().required("Title is required"),
   });
@@ -32,7 +30,7 @@ export default function PopUpForm({ user, onClose, onSubmit }: PopUpFormProps) {
       setLoading(true);
       try {
         onSubmit(values);
-       
+        onClose();
       } catch (err) {
         console.error(err);
       } finally {
@@ -60,17 +58,16 @@ export default function PopUpForm({ user, onClose, onSubmit }: PopUpFormProps) {
             <label className="block text-gray-700 mb-1">Title</label>
             <input
               ref={titleInputRef}
-
               type="text"
               name="title"
-
               value={formik.values.title}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className={`w-full border ${formik.touched.title && formik.errors.title
-                ? "border-red-500"
-                : "border-gray-300"
-                } rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none`}
+              className={`w-full border ${
+                formik.touched.title && formik.errors.title
+                  ? "border-red-500"
+                  : "border-gray-300"
+              } rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none`}
               placeholder="Enter task title"
             />
             {formik.touched.title && formik.errors.title && (
