@@ -63,7 +63,6 @@ export default function Home() {
         });
       }
 
-      await fetchUser();
       setTogglePopForm(false);
     } catch (error) {
       console.error("Error creating task:", error);
