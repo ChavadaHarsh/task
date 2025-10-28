@@ -18,9 +18,8 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", require("./routes/taskRoutes"));
 
-// Start Server
-// app.listen(PORT, () =>
-//   console.log(`🚀 Server running at http://localhost:${PORT}`)
-// );
+app.listen(PORT, () =>
+  console.log(`🚀 Server running at http://localhost:${PORT}`)
+);
 
 module.exports = app;

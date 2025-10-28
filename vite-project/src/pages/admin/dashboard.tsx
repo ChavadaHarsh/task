@@ -60,7 +60,7 @@ export default function Dashboard() {
           </h1>
         </div>
         {loading && (
-          <p className="flex items-center gap-2 text-gray-600">
+          <p className="flex items-center justify-center gap-2 text-gray-600">
             <FaSpinner className="animate-spin text-4xl text-blue-600" />
           </p>
         )}{" "}

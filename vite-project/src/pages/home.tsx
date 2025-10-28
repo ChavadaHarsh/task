@@ -29,19 +29,38 @@ export default function Home() {
   const [editValue, setEditValue] = useState<string>("");
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [togglePopForm, setTogglePopForm] = useState<boolean>(false);
-  const [editProfile, setEditProfile] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [editProfile, setEditProfile] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isProfileLoading, setIsProfileLoading] = useState<boolean>(false);
+  const [isFetchingUser, setIsFetchingUser] = useState<boolean>(true);
 
+  useEffect(() => {
+    if (auth.user?.role === "admin") {
+      navigate("/dashboard");
+      return;
+    }
+    if (!auth.token) {
+      navigate("/login");
+      return;
+    }
+
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
+    fetchUser();
+  }, [auth.token, auth.user?.id, navigate]);
   // Fetch user data from backend
   const fetchUser = async () => {
     if (!auth.token || !auth.user?.id) return;
 
     try {
+      setIsFetchingUser(true);
       const res = await getUserById(auth.token, auth.user.id);
       setUserData(res.data);
     } catch (err) {
       console.error("Error fetching user:", err);
+    } finally {
+      setIsFetchingUser(false);
     }
   };
 
@@ -73,25 +92,9 @@ export default function Home() {
     } catch (error) {
       console.error("Error creating task:", error);
     } finally {
-      setIsLoading(false); // ✅ Stop loader even if error occurs
+      setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (auth.user?.role === "admin") {
-      navigate("/dashboard");
-      return;
-    }
-    if (!auth.token) {
-      navigate("/login");
-      return;
-    }
-
-    if (hasFetched.current) return;
-    hasFetched.current = true;
-
-    fetchUser();
-  }, [auth.token, auth.user?.id, navigate]);
 
   // Task title edit
   const handleTitleEdit = async (
@@ -229,12 +232,24 @@ export default function Home() {
           };
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error while updating profile:", error);
+      alert(error.message);
     } finally {
       setIsProfileLoading(false);
     }
   };
+  if (isFetchingUser) {
+    return (
+      <PageLayout>
+        <div className="w-full flex justify-center items-center py-20">
+          <FaSpinner className="animate-spin text-5xl text-purple-600" />
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (!userData) return null;
 
   return (
     <PageLayout>
@@ -246,8 +261,8 @@ export default function Home() {
         <>
           {/* Header Section */}
           <div className="flex justify-between items-center mt-2 px-5">
-            <button onClick={() => setEditProfile(true)}>
-              <h1 className="text-2xl font-[700] text-gray-600 flex items-center gap-2 capitalize">
+            <button onClick={() => setEditProfile(true)} title="EditProfile">
+              <h1 className="text-2xl font-[700] text-gray-600 flex items-center gap-2 capitalize cursor-pointer">
                 {auth?.user?.fname || "No role found"}{" "}
                 {auth?.user?.lname || "No role found"}
               </h1>

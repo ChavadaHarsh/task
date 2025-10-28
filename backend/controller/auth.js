@@ -92,7 +92,7 @@ exports.login = async (req, res) => {
         lname: user.lname,
         email: user.email,
         role: user.role,
-        password: user.password,
+
         department: user.department,
       },
       token,
@@ -281,7 +281,6 @@ exports.getUsersByRole = async (req, res) => {
           role: user.role,
           state: user.state,
           department: user.department,
-          password: user.department,
           tasks,
           completedTasks,
           totalTasks,
@@ -317,6 +316,7 @@ exports.updateProfile = async (req, res) => {
   try {
     const data = req.body;
 
+    // Validate incoming data
     const { error } = updateProfileValidation.validate(data, {
       abortEarly: false,
     });
@@ -328,6 +328,7 @@ exports.updateProfile = async (req, res) => {
       });
     }
 
+    // Check for user ID
     if (!data.id) {
       return res.status(400).json({
         success: false,
@@ -335,6 +336,7 @@ exports.updateProfile = async (req, res) => {
       });
     }
 
+    // Find existing user
     const existingUser = await User.findById(data.id);
     if (!existingUser) {
       return res.status(404).json({
@@ -343,17 +345,45 @@ exports.updateProfile = async (req, res) => {
       });
     }
 
+    // ✅ Update profile fields
     existingUser.fname = data.fname ?? existingUser.fname;
     existingUser.lname = data.lname ?? existingUser.lname;
     existingUser.email = data.email ?? existingUser.email;
     existingUser.department = data.department ?? existingUser.department;
 
+    // ✅ Handle password change (if provided)
+    if (data.password) {
+      const isSamePassword = await bcrypt.compare(
+        data.password,
+        existingUser.password
+      );
+
+      if (isSamePassword) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Please use a new password — this one matches the old password.",
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      existingUser.password = hashedPassword;
+    }
+
+    // Save updated user
     const updatedUser = await existingUser.save();
 
     return res.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      data: updatedUser,
+      data: {
+        id: updatedUser._id,
+        fname: updatedUser.fname,
+        lname: updatedUser.lname,
+        email: updatedUser.email,
+        department: updatedUser.department,
+        role: updatedUser.role,
+      },
     });
   } catch (error) {
     console.error("Error updating profile:", error);

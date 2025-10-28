@@ -53,11 +53,13 @@ export const updateProfile = async (
   token: string | null,
   user: Partial<user>
 ): Promise<UpdateProfile> => {
+  console.log(user);
+
   return await apiClient("/auth/updateProfile", {
     method: "POST",
     body: user,
     headers: {
-      Authorization: `Bearer ${token}` ,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
   });

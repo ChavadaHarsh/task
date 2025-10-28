@@ -10,11 +10,11 @@ export interface RegisterValues {
   confirmPassword?: string;
   role: "admin" | "employee";
   department:
-  | ""
-  | "Web Development"
-  | "Android Development"
-  | "iOS Development"
-  | "Designing";
+    | ""
+    | "Web Development"
+    | "Android Development"
+    | "iOS Development"
+    | "Designing";
 }
 export interface TaskFormValues {
   title: string;
@@ -55,6 +55,7 @@ export interface user {
   lname: string;
   email: string;
   role: "admin" | "employee";
+  password?: string;
 
   department: string;
 }
@@ -72,11 +73,9 @@ export interface Task {
   createdAt?: Date | string | null;
   updatedAt?: string | null | undefined;
 }
-export interface updatedata{
-  title:string,
-    adminId?: string | null;
-
-
+export interface updatedata {
+  title: string;
+  adminId?: string | null;
 }
 
 export interface Pagination {
@@ -96,10 +95,10 @@ export interface GetTaskResponse {
   task: Task;
 }
 
-export interface taskStatusChange{
-  status:"completed" |"pending"
-  statusChangeRole:string,
-  adminId:string
+export interface taskStatusChange {
+  status: "completed" | "pending";
+  statusChangeRole: string;
+  adminId: string;
 }
 
 export interface CreateTaskResponse {
@@ -107,15 +106,14 @@ export interface CreateTaskResponse {
   task: Task;
 }
 
-
 export interface ForgotPasswordValues {
-  email: string,
-  password: string,
-  confirmPassword?: string,
+  email: string;
+  password: string;
+  confirmPassword?: string;
 }
 
 export interface ForgotPasswordResponse {
-  message: string
+  message: string;
 }
 
 export interface UserByRoleResponse {
@@ -124,14 +122,14 @@ export interface UserByRoleResponse {
 }
 
 export interface ProfileEditModalProps {
-  user: user |null;
+  user: user | null;
   onClose?: () => void;
   onUpdate: (data: Partial<user>) => void;
 }
 
-export interface UpdateProfile{
-  message:string,
-  data:user
+export interface UpdateProfile {
+  message: string;
+  data: user;
 }
 export interface User {
   _id: string;
@@ -140,6 +138,7 @@ export interface User {
   email: string;
   role: string;
   state: string;
+  password?: string;
   department: string;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
@@ -198,7 +197,7 @@ export interface GetTasksByUserIdResponse {
   tasks: Task[];
 }
 
-export interface GetAllUserResponse{
-  success:string;
-  data:User[];
+export interface GetAllUserResponse {
+  success: string;
+  data: User[];
 }

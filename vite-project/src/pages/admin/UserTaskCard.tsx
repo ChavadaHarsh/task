@@ -3,6 +3,7 @@ import { BsInboxFill } from "react-icons/bs";
 import type { Task, UserWithTaskCount } from "../types";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import { useState } from "react";
 
 interface UserTaskCardProps {
   user: UserWithTaskCount;
@@ -37,6 +38,19 @@ export default function UserTaskCard({
 }: UserTaskCardProps) {
   const auth = useSelector((state: RootState) => state.auth);
 
+  // ✅ Local filter state for each user card
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "completed" | "pending"
+  >("all");
+
+  // ✅ Apply filter only on this user's tasks
+  const filteredTasks =
+    user.tasks?.filter((task) => {
+      if (filterStatus === "completed") return task.status === "completed";
+      if (filterStatus === "pending") return task.status !== "completed";
+      return true;
+    }) || [];
+
   return (
     <div
       key={user._id}
@@ -62,19 +76,35 @@ export default function UserTaskCard({
             </span>
           </div>
         </div>
-        {auth.user?.role === "admin" && (
-          <button
-            onClick={() => setSelectedUser?.(user)}
-            className="bg-purple-600 text-white px-4 py-2 cursor-pointer rounded font-medium shadow hover:bg-purple-700 transition"
+
+        <div className="flex gap-2 items-center">
+          {/* Filter dropdown (only affects this user) */}
+          <select
+            value={filterStatus}
+            onChange={(e) =>
+              setFilterStatus(e.target.value as "all" | "completed" | "pending")
+            }
+            className="border cursor-pointer border-gray-300 rounded-md px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
-            + Add Task
-          </button>
-        )}
+            <option value="all">All</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+          </select>
+
+          {auth.user?.role === "admin" && (
+            <button
+              onClick={() => setSelectedUser?.(user)}
+              className="bg-purple-600 text-white px-4 py-2 cursor-pointer rounded font-medium shadow hover:bg-purple-700 transition"
+            >
+              + Add Task
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Task List */}
-      {user.tasks && user.tasks.length > 0 ? (
-        user.tasks.map((task, index) => (
+      {filteredTasks.length > 0 ? (
+        filteredTasks.map((task, index) => (
           <div
             key={task._id}
             className={`flex items-center rounded px-4 py-2 mb-2 ${
@@ -99,7 +129,6 @@ export default function UserTaskCard({
               }`}
             />
 
-            {/* Edit Mode */}
             {editingId === task._id ? (
               <input
                 type="text"
@@ -144,7 +173,7 @@ export default function UserTaskCard({
       ) : (
         <div className="text-gray-400 italic text-sm w-full h-24 flex flex-col justify-center items-center gap-1 capitalize">
           <BsInboxFill className="text-gray-400 text-3xl" />
-          No Tasks assigned yet
+          No tasks assigned yet
         </div>
       )}
     </div>

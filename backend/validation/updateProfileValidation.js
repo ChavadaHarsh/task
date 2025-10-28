@@ -1,9 +1,10 @@
 const Joi = require("joi");
 
 const updateProfileValidation = Joi.object({
-  id:Joi.string(),
+  id: Joi.string(),
   fname: Joi.string().min(2).required(),
   lname: Joi.string().min(2).required(),
+  password: Joi.string().min(6).allow("").optional(),
   email: Joi.string().email().required(),
   department: Joi.string().valid(
     "Web Development",
@@ -12,7 +13,6 @@ const updateProfileValidation = Joi.object({
     "Designing",
     "admin"
   ),
-
 });
 
 module.exports = updateProfileValidation;
