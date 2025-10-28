@@ -32,7 +32,6 @@ export default function Home() {
   const [editProfile, setEditProfile] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isProfileLoading, setIsProfileLoading] = useState<boolean>(false);
-  const [isFetchingUser, setIsFetchingUser] = useState<boolean>(true);
 
   useEffect(() => {
     if (auth.user?.role === "admin") {
@@ -54,14 +53,11 @@ export default function Home() {
     if (!auth.token || !auth.user?.id) return;
 
     try {
-      setIsFetchingUser(true);
       const res = await getUserById(auth.token, auth.user.id);
       setUserData(res.data);
     } catch (err) {
       console.error("Error fetching user:", err);
-    } finally {
-      setIsFetchingUser(false);
-    }
+    } 
   };
 
   // Handle new task creation
@@ -239,15 +235,7 @@ export default function Home() {
       setIsProfileLoading(false);
     }
   };
-  if (isFetchingUser) {
-    return (
-      <PageLayout>
-        <div className="w-full flex justify-center items-center py-20">
-          <FaSpinner className="animate-spin text-5xl text-purple-600" />
-        </div>
-      </PageLayout>
-    );
-  }
+  
 
   if (!userData) return null;
 

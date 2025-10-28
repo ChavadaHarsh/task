@@ -37,13 +37,13 @@ export default function UserTaskCard({
   handleDrop,
 }: UserTaskCardProps) {
   const auth = useSelector((state: RootState) => state.auth);
+  const [filterStatus, setFilterStatus] = useState<"all" | "completed" | "pending">("all");
 
-  // ✅ Local filter state for each user card
-  const [filterStatus, setFilterStatus] = useState<
-    "all" | "completed" | "pending"
-  >("all");
+  const [confirmDelete, setConfirmDelete] = useState<{
+    open: boolean;
+    taskId: string | null;
+  }>({ open: false, taskId: null });
 
-  // ✅ Apply filter only on this user's tasks
   const filteredTasks =
     user.tasks?.filter((task) => {
       if (filterStatus === "completed") return task.status === "completed";
@@ -57,8 +57,8 @@ export default function UserTaskCard({
       className="bg-white rounded-lg shadow-md p-5 w-full mx-auto mt-4"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+        <div className="flex flex-col">
           <div className="text-2xl font-[700] text-gray-600 flex items-center gap-2 capitalize">
             <FaUser className="inline w-6 h-6 text-gray-400 mr-2" />
             {user.fname} {user.lname}
@@ -77,8 +77,7 @@ export default function UserTaskCard({
           </div>
         </div>
 
-        <div className="flex gap-2 items-center">
-          {/* Filter dropdown (only affects this user) */}
+        <div className="flex gap-2 items-center mt-2 md:mt-0">
           <select
             value={filterStatus}
             onChange={(e) =>
@@ -107,9 +106,8 @@ export default function UserTaskCard({
         filteredTasks.map((task, index) => (
           <div
             key={task._id}
-            className={`flex items-center rounded px-4 py-2 mb-2 ${
-              task.status === "completed" ? "bg-green-100" : "bg-gray-100"
-            }`}
+            className={`flex items-center rounded px-4 py-2 mb-2 ${task.status === "completed" ? "bg-green-100" : "bg-gray-100"
+              }`}
             draggable
             onDragStart={() => handleDragStart(index)}
             onDragOver={(e) => e.preventDefault()}
@@ -122,11 +120,10 @@ export default function UserTaskCard({
               onChange={() =>
                 handleStatusToggle(task._id ?? "", user._id, task.status)
               }
-              className={`mr-3 w-4 h-4 ${
-                task.status === "completed"
-                  ? "accent-green-500"
-                  : "accent-gray-500"
-              }`}
+              className={`mr-3 w-4 h-4 ${task.status === "completed"
+                ? "accent-green-500"
+                : "accent-gray-500"
+                }`}
             />
 
             {editingId === task._id ? (
@@ -152,11 +149,10 @@ export default function UserTaskCard({
                   setEditValue(task.title);
                 }}
                 title="Edit Title"
-                className={`flex-1 cursor-text ${
-                  task.status === "completed"
-                    ? "line-through text-gray-500"
-                    : "text-gray-700"
-                }`}
+                className={`flex-1 cursor-text ${task.status === "completed"
+                  ? "line-through text-gray-500"
+                  : "text-gray-700"
+                  }`}
               >
                 {task.title || "Unnamed Task"}
               </span>
@@ -164,7 +160,9 @@ export default function UserTaskCard({
 
             <button
               className="ml-2"
-              onClick={() => handleDelete(task._id ?? "", user._id)}
+              onClick={() =>
+                setConfirmDelete({ open: true, taskId: task._id ?? "" })
+              }
             >
               <FaTrash className="w-5 h-5 text-red-500 cursor-pointer hover:text-red-700 transition" />
             </button>
@@ -176,6 +174,33 @@ export default function UserTaskCard({
           No tasks assigned yet
         </div>
       )}
+
+
+      {confirmDelete.open && (
+        <div className="fixed bottom-6 right-6 bg-white shadow-xl border border-gray-200 rounded-lg p-4 w-72 animate-slide-up z-50">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">
+            Are you sure you want to delete this task?
+          </h3>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => {
+                handleDelete(confirmDelete.taskId, user._id);
+                setConfirmDelete({ open: false, taskId: null });
+              }}
+              className="bg-red-600 text-white px-3 py-1.5 text-sm rounded hover:bg-red-700 transition"
+            >
+              Yes
+            </button>
+            <button
+              onClick={() => setConfirmDelete({ open: false, taskId: null })}
+              className="bg-gray-200 text-gray-700 px-3 py-1.5 text-sm rounded hover:bg-gray-300 transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
