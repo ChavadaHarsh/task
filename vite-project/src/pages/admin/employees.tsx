@@ -113,7 +113,7 @@ export default function Employees() {
 
           <button
             onClick={() => setPop(true)}
-            className="flex gap-2 items-center justify-center py-2 px-4 w-full md:w-auto bg-blue-500 text-white font-medium rounded border border-blue-500 hover:bg-blue-600 hover:border-blue-600 transition-all duration-300"
+            className="flex gap-2 cursor-pointer items-center justify-center py-2 px-4 w-full md:w-auto bg-blue-500 text-white font-medium rounded border border-blue-500 hover:bg-blue-600 hover:border-blue-600 transition-all duration-300"
           >
             <IoPersonAdd className="text-lg" />
             Add Employee
@@ -158,13 +158,13 @@ export default function Employees() {
                       <td className="px-4 py-3 flex justify-center gap-3">
                         <button
                           onClick={() => onEdit(user._id)}
-                          className="p-2 rounded-lg border border-blue-400 text-blue-500 hover:bg-blue-100"
+                          className="p-2 rounded-lg border border-blue-400 text-blue-500 hover:bg-blue-100 cursor-pointer"
                         >
                           <AiOutlineEdit size={18} />
                         </button>
                         <button
                           onClick={() => handleUserDelete(user._id)}
-                          className="p-2 rounded-lg border border-red-400 text-red-500 hover:bg-red-100"
+                          className="p-2 rounded-lg border border-red-400 text-red-500 hover:bg-red-100 cursor-pointer"
                         >
                           <AiOutlineDelete size={18} />
                         </button>

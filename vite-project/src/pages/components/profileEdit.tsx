@@ -3,6 +3,9 @@ import * as Yup from "yup";
 import type { ProfileEditModalProps } from "../types";
 import type { RootState } from "../../store";
 import { useSelector } from "react-redux";
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import { RiLockPasswordLine } from "react-icons/ri";
+import { useState } from "react";
 
 export default function ProfileEditModal({
   user,
@@ -10,6 +13,7 @@ export default function ProfileEditModal({
   onUpdate,
 }: ProfileEditModalProps) {
   const auth = useSelector((state: RootState) => state.auth);
+  const [showPassword, setShowPassword] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -154,24 +158,37 @@ export default function ProfileEditModal({
           </div>
 
           {/* Password */}
-          <div>
-            <input
-              type="password"
-              name="password"
-              placeholder="New Password (optional)"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              className={`w-full border p-2 rounded ${
-                formik.touched.password && formik.errors.password
-                  ? "border-red-500"
-                  : "border-gray-300"
-              }`}
-            />
+          <div className="flex flex-col gap-2 relative">
+            <label htmlFor="password" className="text-lg font-semibold">
+              Password
+            </label>
+            <div className="relative">
+              <RiLockPasswordLine className="absolute top-1/2 left-3 -translate-y-1/2 text-2xl text-gray-400" />
+
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="Enter password"
+                className={`w-full p-2 pl-12 text-lg rounded-xl border-2 focus:outline-none focus:border-blue-600 transition ${
+                  formik.touched.email && formik.errors.email
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-[15px] text-gray-600 text-lg hover:text-gray-800"
+              >
+                {showPassword ? <FiEye /> : <FiEyeOff />}
+              </button>
+            </div>
             {formik.touched.password && formik.errors.password && (
-              <p className="text-red-500 text-sm mt-1">
-                {formik.errors.password}
-              </p>
+              <p className="text-red-500 text-sm">{formik.errors.password}</p>
             )}
           </div>
 
