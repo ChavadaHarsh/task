@@ -4,7 +4,6 @@ import type { ProfileEditModalProps } from "../types";
 import type { RootState } from "../../store";
 import { useSelector } from "react-redux";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { RiLockPasswordLine } from "react-icons/ri";
 import { useState } from "react";
 
 export default function ProfileEditModal({
@@ -159,12 +158,7 @@ export default function ProfileEditModal({
 
           {/* Password */}
           <div className="flex flex-col gap-2 relative">
-            <label htmlFor="password" className="text-lg font-semibold">
-              Password
-            </label>
             <div className="relative">
-              <RiLockPasswordLine className="absolute top-1/2 left-3 -translate-y-1/2 text-2xl text-gray-400" />
-
               <input
                 id="password"
                 name="password"
