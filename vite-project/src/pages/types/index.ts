@@ -201,3 +201,20 @@ export interface GetAllUserResponse {
   success: string;
   data: User[];
 }
+export interface UserTaskCardProps {
+  user: UserWithTaskCount;
+  setSelectedUser?: (user: UserWithTaskCount) => void;
+  editingId: string | null;
+  editValue: string;
+  setEditingId: (id: string | null) => void;
+  setEditValue: (val: string) => void;
+  handleTitleEdit: (taskId: string | null, userId: string, task: Task) => void;
+  handleStatusToggle: (
+    taskId: string | null,
+    userId: string,
+    currentStatus: "completed" | "pending"
+  ) => void;
+  handleDelete: (taskId: string | null, userId: string) => void;
+  handleDragStart: (index: number) => void;
+  handleDrop: (index: number, userId: string) => void;
+}

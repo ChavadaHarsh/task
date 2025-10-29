@@ -65,7 +65,6 @@ export default function UsersView() {
     if (!auth?.token || !auth?.user || !selectedUser?._id) return;
 
     try {
-      setLoading(true);
       const task = {
         ...data,
         adminId: auth.user.id,
@@ -91,8 +90,6 @@ export default function UsersView() {
       setSelectedUser(null);
     } catch (error) {
       console.error("Error creating task:", error);
-    } finally {
-      setLoading(false);
     }
   };
 

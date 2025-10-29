@@ -1,27 +1,9 @@
 import { FaUser, FaGripVertical, FaTrash } from "react-icons/fa";
 import { BsInboxFill } from "react-icons/bs";
-import type { Task, UserWithTaskCount } from "../types";
+import type { UserTaskCardProps } from "../types";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { useState } from "react";
-
-interface UserTaskCardProps {
-  user: UserWithTaskCount;
-  setSelectedUser?: (user: UserWithTaskCount) => void;
-  editingId: string | null;
-  editValue: string;
-  setEditingId: (id: string | null) => void;
-  setEditValue: (val: string) => void;
-  handleTitleEdit: (taskId: string | null, userId: string, task: Task) => void;
-  handleStatusToggle: (
-    taskId: string | null,
-    userId: string,
-    currentStatus: "completed" | "pending"
-  ) => void;
-  handleDelete: (taskId: string | null, userId: string) => void;
-  handleDragStart: (index: number) => void;
-  handleDrop: (index: number, userId: string) => void;
-}
 
 export default function UserTaskCard({
   user,
@@ -37,7 +19,9 @@ export default function UserTaskCard({
   handleDrop,
 }: UserTaskCardProps) {
   const auth = useSelector((state: RootState) => state.auth);
-  const [filterStatus, setFilterStatus] = useState<"all" | "completed" | "pending">("all");
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "completed" | "pending"
+  >("all");
 
   const [confirmDelete, setConfirmDelete] = useState<{
     open: boolean;
@@ -106,8 +90,9 @@ export default function UserTaskCard({
         filteredTasks.map((task, index) => (
           <div
             key={task._id}
-            className={`flex items-center rounded px-4 py-2 mb-2 ${task.status === "completed" ? "bg-green-100" : "bg-gray-100"
-              }`}
+            className={`flex items-center rounded px-4 py-2 mb-2 ${
+              task.status === "completed" ? "bg-green-100" : "bg-gray-100"
+            }`}
             draggable
             onDragStart={() => handleDragStart(index)}
             onDragOver={(e) => e.preventDefault()}
@@ -120,10 +105,11 @@ export default function UserTaskCard({
               onChange={() =>
                 handleStatusToggle(task._id ?? "", user._id, task.status)
               }
-              className={`mr-3 w-4 h-4 ${task.status === "completed"
-                ? "accent-green-500"
-                : "accent-gray-500"
-                }`}
+              className={`mr-3 w-4 h-4 ${
+                task.status === "completed"
+                  ? "accent-green-500"
+                  : "accent-gray-500"
+              }`}
             />
 
             {editingId === task._id ? (
@@ -149,10 +135,11 @@ export default function UserTaskCard({
                   setEditValue(task.title);
                 }}
                 title="Edit Title"
-                className={`flex-1 cursor-text ${task.status === "completed"
-                  ? "line-through text-gray-500"
-                  : "text-gray-700"
-                  }`}
+                className={`flex-1 cursor-text ${
+                  task.status === "completed"
+                    ? "line-through text-gray-500"
+                    : "text-gray-700"
+                }`}
               >
                 {task.title || "Unnamed Task"}
               </span>
@@ -174,7 +161,6 @@ export default function UserTaskCard({
           No tasks assigned yet
         </div>
       )}
-
 
       {confirmDelete.open && (
         <div className="fixed bottom-6 right-6 bg-white shadow-xl border border-gray-200 rounded-lg p-4 w-72 animate-slide-up z-50">
@@ -200,7 +186,6 @@ export default function UserTaskCard({
           </div>
         </div>
       )}
-
     </div>
   );
 }
