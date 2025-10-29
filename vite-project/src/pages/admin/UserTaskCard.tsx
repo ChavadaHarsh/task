@@ -1,4 +1,4 @@
-import { FaUser, FaGripVertical, FaTrash } from "react-icons/fa";
+import { FaUser, FaGripVertical, FaTrash, FaSpinner } from "react-icons/fa";
 import { BsInboxFill } from "react-icons/bs";
 import type { UserTaskCardProps } from "../types";
 import { useSelector } from "react-redux";
@@ -17,6 +17,7 @@ export default function UserTaskCard({
   handleDelete,
   handleDragStart,
   handleDrop,
+  loadingUserId,
 }: UserTaskCardProps) {
   const auth = useSelector((state: RootState) => state.auth);
   const [filterStatus, setFilterStatus] = useState<
@@ -36,10 +37,12 @@ export default function UserTaskCard({
     }) || [];
 
   return (
-    <div
-      key={user._id}
-      className="bg-white rounded-lg shadow-md p-5 w-full mx-auto mt-4"
-    >
+    <div className="bg-white rounded-lg shadow-md p-5 w-full mx-auto mt-4">
+      {loadingUserId && (
+        <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] flex justify-center items-center rounded-lg z-20">
+          <FaSpinner className="animate-spin text-4xl text-blue-600" />
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
         <div className="flex flex-col">

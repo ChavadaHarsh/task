@@ -37,6 +37,7 @@ export default function UsersView() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
@@ -59,37 +60,36 @@ export default function UsersView() {
     if (hasFetched.current === dept) return;
     hasFetched.current = dept;
     fetchUsers();
-  }, [dept, auth?.token]);
+  }, [dept]);
 
   const handleSubmit = async (data: Task) => {
     if (!auth?.token || !auth?.user || !selectedUser?._id) return;
 
+    const task = {
+      ...data,
+      adminId: auth.user.id,
+      userId: selectedUser._id,
+    };
+    setUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        user._id === selectedUser._id
+          ? {
+              ...user,
+              tasks: [...(user.tasks || []), task],
+              totalTasks: (user.totalTasks || 0) + 1,
+            }
+          : user
+      )
+    );
     try {
-      const task = {
-        ...data,
-        adminId: auth.user.id,
-        userId: selectedUser._id,
-      };
-
-      const res = await createTask(auth.token, task);
-
-      if (res?.task) {
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user._id === selectedUser._id
-              ? {
-                  ...user,
-                  tasks: [...(user.tasks || []), res.task],
-                  totalTasks: (user.totalTasks || 0) + 1,
-                }
-              : user
-          )
-        );
-      }
+      setLoadingUserId(selectedUser?._id);
+      await createTask(auth.token, task);
 
       setSelectedUser(null);
     } catch (error) {
       console.error("Error creating task:", error);
+    } finally {
+      setLoadingUserId(null);
     }
   };
 
@@ -291,6 +291,7 @@ export default function UsersView() {
                 handleDelete={handleDelete}
                 handleDragStart={handleDragStart}
                 handleDrop={handleDrop}
+                loadingUserId={loadingUserId === user._id}
               />
             ))}
 

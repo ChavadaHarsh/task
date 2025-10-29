@@ -217,4 +217,5 @@ export interface UserTaskCardProps {
   handleDelete: (taskId: string | null, userId: string) => void;
   handleDragStart: (index: number) => void;
   handleDrop: (index: number, userId: string) => void;
+  loadingUserId?: boolean;
 }
