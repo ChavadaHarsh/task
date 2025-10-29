@@ -166,7 +166,7 @@ export default function ProfileEditModal({
                 value={formik.values.password}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                placeholder="Enter password"
+                placeholder="Enter new password (optional)"
                 className={`w-full p-2 pl-12 text-lg rounded-xl border-2 focus:outline-none focus:border-blue-600 transition ${
                   formik.touched.email && formik.errors.email
                     ? "border-red-500"
