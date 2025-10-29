@@ -16,10 +16,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { sessionRemove } from "../../store/slices/authSlice";
 import type { RootState } from "../../store";
 import { logoutUser } from "../../api/authApi";
+import LogoutConfirm from "../auth/LogoutConfirm";
 
 export default function AdminNavBar() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const auth = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -61,9 +63,14 @@ export default function AdminNavBar() {
 
   return (
     <nav className="bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md fixed top-0 left-0 w-full z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3 relative">
         {/* Logo */}
-        <div className="text-xl font-bold">Admin Panel</div>
+        <div
+          className="text-xl font-bold cursor-pointer"
+          onClick={() => navigate("/dashboard")}
+        >
+          Admin Panel
+        </div>
 
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center space-x-6">
@@ -84,7 +91,7 @@ export default function AdminNavBar() {
 
           {auth.token ? (
             <button
-              onClick={() => handleLogout(auth.token)}
+              onClick={() => setConfirmLogout(true)}
               className="flex items-center gap-2 font-medium hover:text-gray-200 cursor-pointer transition-all"
             >
               <FaSignOutAlt />
@@ -108,11 +115,21 @@ export default function AdminNavBar() {
         >
           {isOpen ? <FaTimes /> : <FaBars />}
         </button>
+
+        {/* ✅ Logout Confirm Popup */}
+        {confirmLogout && (
+          <div className="absolute top-2 right-6">
+            <LogoutConfirm
+              onConfirm={() => handleLogout(auth.token)}
+              onCancel={() => setConfirmLogout(false)}
+            />
+          </div>
+        )}
       </div>
 
       {/* Mobile Navigation */}
       {isOpen && (
-        <div className="lg:hidden bg-blue-600 px-6 pb-4 space-y-2">
+        <div className="lg:hidden bg-blue-600 px-6 pb-4 space-y-2 animate-fadeIn">
           {navItems.map(({ to, label, icon }) => (
             <Link
               key={to}
@@ -131,7 +148,7 @@ export default function AdminNavBar() {
 
           {auth.token ? (
             <button
-              onClick={() => handleLogout(auth.token)}
+              onClick={() => setConfirmLogout(true)}
               className="flex items-center gap-2 font-medium cursor-pointer hover:text-gray-200 transition-all w-full"
             >
               <FaSignOutAlt />

@@ -219,3 +219,7 @@ export interface UserTaskCardProps {
   handleDrop: (index: number, userId: string) => void;
   loadingUserId?: boolean;
 }
+export interface LogoutConfirmProps {
+  onConfirm: () => void;
+  onCancel: () => void;
+}
