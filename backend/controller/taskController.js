@@ -1,3 +1,5 @@
+// Update task order for a user
+
 // controller/taskController.js
 const Task = require("../models/task.js");
 const User = require("../models/user.js");
@@ -21,15 +23,26 @@ exports.createTask = async (req, res) => {
       });
     }
 
+    // Find the highest order for this user
+    let order = 0;
+    if (req.body.userId) {
+      const lastTask = await Task.findOne({ userId: req.body.userId }).sort({
+        order: -1,
+      });
+      if (lastTask && typeof lastTask.order === "number") {
+        order = lastTask.order + 1;
+      }
+    }
+
     const newTaskData = {
       title: req.body.title,
-
       userId: req.body.userId,
       createRole: req.body.createRole,
       createDepartment: req.body.createDepartment,
       status: req.body.status || "pending",
       statusChangeRole: req.body.statusChangeRole || "none",
       adminId: req.body.adminId || null,
+      order: order,
     };
 
     const task = await Task.create(newTaskData);
@@ -157,8 +170,6 @@ exports.deleteTask = async (req, res) => {
   }
 };
 
-
-
 exports.getUserById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -179,7 +190,7 @@ exports.getUserById = async (req, res) => {
     }
 
     // ✅ Fetch tasks assigned to this user
-    const tasks = await Task.find({ userId: id });
+    const tasks = await Task.find({ userId: id }).sort({ order: 1 });
 
     // ✅ Calculate task statistics
     const completedTasks = await Task.countDocuments({
@@ -216,5 +227,28 @@ exports.getUserById = async (req, res) => {
       success: false,
       message: "Server error",
     });
+  }
+};
+exports.updateTaskOrder = async (req, res) => {
+  try {
+    const { userId, orderedTaskIds } = req.body;
+    if (!userId || !Array.isArray(orderedTaskIds)) {
+      return res
+        .status(400)
+        .json({ message: "userId and orderedTaskIds are required" });
+    }
+
+    // Update each task's order field
+    const bulkOps = orderedTaskIds.map((taskId, idx) => ({
+      updateOne: {
+        filter: { _id: taskId, userId },
+        update: { $set: { order: idx } },
+      },
+    }));
+
+    await Task.bulkWrite(bulkOps);
+    res.status(200).json({ message: "Task order updated successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };

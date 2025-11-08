@@ -1,3 +1,4 @@
+
 import type {
   CreateTaskResponse,
   GetTaskResponse,
@@ -95,6 +96,19 @@ export const getUserById = async (
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
+    },
+  });
+};
+export const updateTaskOrder = async (
+  token: string | null | undefined,
+  userId: string,
+  orderedTaskIds: string[]
+): Promise<{ message: string }> => {
+  return apiClient("/tasks/updateTaskOrder", {
+    method: "POST",
+    body: { userId, orderedTaskIds },
+    headers: {
+      Authorization: `Bearer ${token}`,
     },
   });
 };

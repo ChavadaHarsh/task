@@ -8,6 +8,7 @@ import {
   statusChangeTask,
   deleteTask,
   createTask,
+  updateTaskOrder,
 } from "../api/taskApi";
 import { useEffect, useRef, useState } from "react";
 import UserTaskCard from "./admin/UserTaskCard";
@@ -188,16 +189,31 @@ export default function Home() {
 
   // Drag and drop
   const handleDragStart = (index: number) => setDraggedIndex(index);
-  const handleDrop = (index: number) => {
-    if (draggedIndex === null || !userData) return;
+const handleDrop = async (index: number) => {
+  if (draggedIndex === null || !userData || !auth?.token) return;
 
-    const updatedTasks = [...userData.tasks];
-    const [moved] = updatedTasks.splice(draggedIndex, 1);
-    updatedTasks.splice(index, 0, moved);
+  // Reorder tasks locally first
+  const updatedTasks = [...userData.tasks];
+  const [moved] = updatedTasks.splice(draggedIndex, 1);
+  updatedTasks.splice(index, 0, moved);
 
-    setUserData({ ...userData, tasks: updatedTasks });
-    setDraggedIndex(null);
-  };
+  // Create new order array
+  const newOrder = updatedTasks.map((t) => t._id!);
+
+  // Update state immediately for smooth UI
+  setUserData({ ...userData, tasks: updatedTasks });
+  setDraggedIndex(null);
+
+  // 🧩 Now call backend to persist order
+  try {
+    console.log("📡 Sending task order to API:", newOrder);
+    await updateTaskOrder(auth.token, userData._id, newOrder);
+    console.log("✅ Task order updated successfully on server");
+  } catch (err) {
+    console.error("❌ Error updating task order:", err);
+  }
+};
+
 
   if (!userData) return null;
 

@@ -10,6 +10,7 @@ import {
   deleteTask,
   statusChangeTask,
   updateTask,
+  updateTaskOrder,
 } from "../../api/taskApi";
 import {
   FaAndroid,
@@ -215,19 +216,46 @@ export default function UsersView() {
 
   const handleDragStart = (index: number) => setDraggedIndex(index);
 
-  const handleDrop = (index: number, userId: string) => {
-    if (draggedIndex === null) return;
-    setUsers((prevUsers) =>
-      prevUsers.map((user) => {
-        if (user._id !== userId) return user;
-        const updatedTasks = [...user.tasks];
-        const [moved] = updatedTasks.splice(draggedIndex, 1);
-        updatedTasks.splice(index, 0, moved);
-        return { ...user, tasks: updatedTasks };
-      })
-    );
-    setDraggedIndex(null);
-  };
+ const handleDrop = async (index: number, userId: string) => {
+  if (draggedIndex === null) return;
+
+  let newOrder: string[] = [];
+
+  // Update UI immediately
+  setUsers((prevUsers) => {
+    return prevUsers.map((user) => {
+      if (user._id !== userId) return user;
+
+      const updatedTasks = [...user.tasks];
+      const [moved] = updatedTasks.splice(draggedIndex, 1);
+      updatedTasks.splice(index, 0, moved);
+
+      newOrder = updatedTasks.map((t) => t._id!);
+      return { ...user, tasks: updatedTasks };
+    });
+  });
+
+  // Wait one tick to ensure state has updated
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  setDraggedIndex(null);
+
+  // ✅ Move API call *after* newOrder is stable
+  if (!auth?.token || !userId) return;
+  if (newOrder.length === 0) {
+    console.warn("⚠️ newOrder array is empty, skipping updateTaskOrder.");
+    return;
+  }
+
+  try {
+    console.log("📡 Calling updateTaskOrder:", { userId, newOrder });
+    await updateTaskOrder(auth.token, userId, newOrder);
+    console.log("✅ Task order updated successfully!");
+  } catch (err) {
+    console.error("❌ Error updating task order:", err);
+  }
+};
+
 
   const deptIcons: Record<string, JSX.Element> = {
     "Web Development": (

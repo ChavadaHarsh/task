@@ -40,6 +40,10 @@ const taskSchema = new mongoose.Schema(
       enum: ["admin", "employee", "none"],
       default: "none",
     },
+    order: {
+      type: Number,
+      default: 0,
+    },
     adminId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

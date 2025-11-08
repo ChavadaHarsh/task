@@ -262,7 +262,7 @@ exports.getUsersByRole = async (req, res) => {
     const usersWithTaskStats = await Promise.all(
       users.map(async (user) => {
         // Total tasks
-        const tasks = await Task.find({ userId: user._id });
+        const tasks = await Task.find({ userId: user._id }).sort({ order: 1 });
 
         // Completed tasks
         const completedTasks = await Task.countDocuments({
